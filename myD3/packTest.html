@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pack</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<style>
+</style>
+<body>
+    <script>
+    var width = 1000;
+    var height = 1000;
+
+    var data={"name": "bing","val":87,
+    "children": [{name:'csdn',val:23},{name:'github',val:23},
+                {name:'stackoverflow',val:9},
+                {name:'cnblog',val:4}
+             ,{name:'vimsky',val:4},{name:'jianshu',val:3},{name:'observable',val:5},
+            {name:'tencentyun',val:3},{name:'d3.org',val:6},
+             {name:'others',val:12}]}
+    
+    var tooltip = d3.select("body").append("div")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("opacity", "0")
+    .style("color", "white")
+    .style("padding", "8px")
+    .style("background-color", "rgba(0, 0, 0, 0.75)")
+    .style("border-radius", "6px")
+    .style("font", "12px sans-serif")
+    .text("tooltip");
+  
+
+    pack = data => {
+  const root = d3.hierarchy(data);
+  root.sum(d => d.val)
+  return d3.pack()
+      .size([width/2, height/2])
+      .padding(3)
+    (root);
+}    
+[87,23,12,9,6,5,4,3]
+var color = d3.scaleOrdinal().domain([87,23,12,9,6,5,4,3])
+	.range(["#BBDEFB","#98CAF9","#64B5F6","#42A5F5","#2196F3","#1E88E5","#1976D2","#3976D2"]);
+
+var root=pack(data)
+
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append('g')
+    .attr('id', 'maingroup')
+    .attr('transform',"translate(250,250)")
+
+    /*svg.append("text")
+    .style("font", "16px sans-serif")
+    .style("pointer-events", "none")
+     .text("What websites will help me solve problems when I bing 'd3+X'")
+     .attr('transform','translate(40,520)')*/
+
+    var drawBoard = svg.selectAll('g')
+    .data(root)
+    .enter()
+    .append("g")
+    .attr('transform', function(d)
+    {return "translate(" + d.x + "," + d.y + ")";});
+
+    drawBoard.append("circle")
+    .attr("fill", function(d){
+        return color(d.data.val)
+    })
+    .attr("fill-opacity", "0.4")
+    .attr("r", function(d) {
+        return d.r;
+    })
+    .on("mouseover", function(d, i) {
+        console.log(d)
+        //console.log(d.tooltip)
+        tooltip
+        .style("opacity", "1")
+      .html("using times: "+d.val)
+      .style("left", (d.pageY)+"px")
+      .style("top",  (d.pageX)+"px")
+
+        d3.select(this)
+          .attr("fill", "yellow")
+    })
+    .on("mousemove", function(d,i) {
+          return tooltip.style("top", (d.pageY+10)+"px").style("left",(d.pageX+10)+"px");
+      })
+    .on("mouseout", function(d, i) {
+        d3.select(this)
+            .attr("fill", function(d){
+        return color(d.data.val)
+    });
+    tooltip
+        .style("opacity", "0")
+    });
+
+    drawBoard.append('text')
+    .attr("dy", ".3em")
+    .style("text-anchor", function(d){
+        if(d.depth==0){
+            return null
+        }
+        else return "middle"
+    })
+    .style("font", "10px sans-serif")
+    .style("pointer-events", "none")
+    .text(function(d) {
+        if(d.depth==0){
+            return null
+        }
+        else return d.data.name
+    })
+    
+    
+
+
+
+
+
+
+
+    </script>
+    
+</body>
+</html>

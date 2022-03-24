@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tree</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <script>
+        var width = 1500;
+        var height = 1000;
+
+        var obj={
+  "name": "Imma Sort",
+  "children": [
+    {
+      "name": "Unsupervised Ranking of Multi-Attribute Objects Based on Principal Curves"
+    },
+    {
+      "name": "Podium: Ranking Data Using Mixed-Initiative Visual Analytics",
+    },
+    {
+      "name": "LineUp: Visual Analysis of Multi-Attribute Rankings",
+      "children":[
+        {"name":"ValueCharts: Analyzing Linear Models Expressing Preferences and Evaluations. "},
+        {"name":"Automating the Design of Graphical Presentations of Relational Information"}
+      ]
+    },
+    {
+      "name":"How do People Sort by Ratings?"
+    },
+    {
+      "name": "[4]",
+      "children": [
+        {
+          "name": "Visualization for decision making under uncertainty."
+        }
+      ]
+    },
+    {
+      "name": "Rank As You Go: User-Driven Exploration of Search Results"
+    }
+  ]
+ }
+ /*
+
+
+
+
+
+        var obj={
+  "name": "Visual Arrangements of Bar Charts Influence Comparisons in Viewer Takeaways",
+  "children": [
+    {
+      "name": "Bars and lines: A study of graphic communication"
+    },]}*/
+            
+  var dx=10
+  var dy=154
+        
+        root=d3.hierarchy(obj).count()
+        console.log(root)  
+        tree = d3.tree().nodeSize([50, 300])
+                .separation(function(a,b){
+            return (a.parent==b.parent ? 1:4)
+        })
+        tree=tree(root)
+        console.log(tree)
+        function Tnodes(tree){
+            nodes = tree.descendants().filter(d => d.data.name)
+            nodes.forEach(function(d){
+                if(d.depth === 1) {
+                d.rootId = d.data.name
+                 } else {
+                        let a = d
+                        //console.log(a.parent)
+                         while(a.parent!=null&&a.parent.depth > 0) {
+                            //console.log(a.parent.depth)
+                            a = a.parent
+                        }
+                        d.rootId = a.data.name
+                        }}
+                       
+                        )
+            return nodes
+        }
+
+    nodes =Tnodes(tree)
+    console.log(nodes)
+
+
+  const svg = d3.select("body")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("font", "12px sans-serif")
+    .style("user-select", "none");
+
+  const gLink = svg
+    .append("g")
+    .attr("fill", "none")
+    .attr("stroke", "#555")
+    .attr("stroke-opacity", 0.4)
+    .attr("stroke-width", 1.5);
+
+  const gNode = svg
+    .append("g")
+    .attr("pointer-events", "all");
+
+    const links = tree.links();
+    console.log(links)
+
+
+    // calc the new tree layout
+    
+/*
+    let left = root;
+    let right = root;
+    root.eachBefore(node => {
+      if (node.x < left.x) left = node;
+      if (node.x > right.x) right = node;
+    });
+
+   */
+
+    // Update the nodes…
+    const node = gNode.selectAll("g").data(nodes);
+
+    // Enter any new nodes at the parent's previous position.
+    const nodeEnter = node
+      .enter()
+      .append("g")
+      .attr("transform", d => `translate(${d.y+300},${d.x+300})`)
+      //.attr("fill-opacity", 0)
+      //.attr("stroke-opacity", 0)
+
+    nodeEnter
+      .append("circle")
+      .attr("r", 2.5)
+      .attr("fill", function(d){return (d.children ? "#555" : "#bbb")})
+      .attr("stroke-width", 10);
+
+    nodeEnter
+      .append("text")
+      .attr("dy", 3)
+      .attr("x", function(d) { return d.children ? -8 : 8; })
+      .attr("text-anchor", d => (d.children ? "end" : "start"))
+      .text(d => d.data.name)
+      .clone(true)
+      .lower()
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-width", 3)
+      .attr("stroke", "white");
+
+    // Update the links…
+    
+    const link = gLink.selectAll("path").data(links);
+
+    // Enter any new links at the parent's previous position.
+    diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x)
+
+    const linkEnter = link
+      .enter()
+      .append("path")
+      .attr("stroke",function(d,i){
+        if(i>=1) return "#FFB833"
+        else return "#494EB2"
+      })
+      .attr("d", d3.linkHorizontal()
+          .x(function(d) { return d.y+300; })
+          .y(function(d) { return d.x+300; }));
+
+    // Transition links to their new position.
+    // Transition exiting nodes to the parent's new position.
+
+    // Stash the old positions for transition.
+    root.eachBefore(d => {
+      d.x0 = d.x;
+      d.y0 = d.y;
+    });
+  
+
+
+  
+
+    </script>
+    
+</body>
+</html>
